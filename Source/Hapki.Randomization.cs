@@ -24,8 +24,8 @@ public struct Randomizer {
 public struct WeightedRandomizer {
     public List<float> weights;
 
-    public static implicit operator WeightedRandomizer(int _) {
-        return new WeightedRandomizer {weights = new List<float>()};
+    public static implicit operator WeightedRandomizer(int count) {
+        return new WeightedRandomizer {weights = new List<float>(count)};
     }
 
     public static int operator%(WeightedRandomizer rand, int count) {

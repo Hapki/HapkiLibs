@@ -1,0 +1,10 @@
+{
+    "category": "Utilities",
+    "description": "Hapki Libs",
+    "keywords": [
+        "hapki"
+    ],
+    "name": "se.hapki.libs",
+    "unity": "2018.1",
+    "version": "0.0.2"
+}
