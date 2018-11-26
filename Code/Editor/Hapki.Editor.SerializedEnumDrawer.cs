@@ -9,6 +9,8 @@ using UnityEngine;
 
 namespace Hapki.Editor {
 
+using Enum = System.Enum;
+
 [CustomPropertyDrawer(typeof(SerializedEnumAttribute))]
 public class SerializedEnumDrawer : PropertyDrawer {
     public override void OnGUI(Rect position, SerializedProperty property, GUIContent label) {

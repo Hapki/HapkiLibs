@@ -8,6 +8,8 @@ using UnityEngine;
 
 namespace Hapki.Interpolation {
 
+using Enum = Hapki.Enum;
+
 public enum Interpolation {
     Linear,
     SmoothStep,
@@ -24,10 +26,6 @@ public static class Interpolations {
     static readonly IInterpolation[] interpolations;
 
     static Interpolations() {
-#if XXX
-        // FIXME: this is not working with il2cpp, throws TypeLoadException
-        interpolations = EnumExtensions.GetValuesAsInstances<IInterpolation>(typeof(Interpolation));
-#else
         interpolations = new IInterpolation[] {
             new Linear(),
             new SmoothStep(),
@@ -39,7 +37,6 @@ public static class Interpolations {
             new EaseOutSine(),
             new EaseInOutSine()
         };
-#endif
     }
 
     public static IInterpolation GetInterpolation(Interpolation i) {
@@ -47,7 +44,7 @@ public static class Interpolations {
     }
 
     public static IInterpolation GetInterpolation(string name) {
-        return GetInterpolation(EnumExtensions.Parse<Interpolation>(name));
+        return GetInterpolation(Enum.Parse<Interpolation>(name));
     }
 
     public static float Linear(float x, float y, float t) {
