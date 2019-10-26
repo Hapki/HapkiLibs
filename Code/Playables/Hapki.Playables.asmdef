@@ -1,7 +1,8 @@
 {
     "name": "Hapki.Playables",
     "references": [
-        "Hapki"
+        "Hapki",
+        "Unity.Timeline"
     ],
     "optionalUnityReferences": [],
     "includePlatforms": [],

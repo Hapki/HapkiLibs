@@ -4,8 +4,6 @@
 // No warranty for any purpose is expressed or implied.
 
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.Audio;
 using UnityEngine.Playables;
 
 namespace Hapki.Playables {
@@ -41,7 +39,7 @@ public struct Tweener : ITweener {
     }
 }
 
-public static class PlayableExtensions {
+public static partial class PlayableExtensions {
     public static void BlendInputWeights<T>(this T playable, float value, float influence = 1f)
             where T : struct, IPlayable {
         int count = playable.GetInputCount();
