@@ -60,10 +60,11 @@ public static partial class PlayableExtensions {
         return (null, upper);
     }
 
-    public static (int, int) GetActiveMixerInputs(this Playable mixer, TimelineClip[] clips) =>
+    public static (int first, int second) GetActiveMixerInputs(this Playable mixer, TimelineClip[] clips) =>
         mixer.GetActiveMixerInputs(clips, mixer.GetMixerTime());
 
-    public static (int, int) GetActiveMixerInputs(this Playable mixer, TimelineClip[] clips, double time) {
+    public static (int first, int second) GetActiveMixerInputs(
+            this Playable mixer, TimelineClip[] clips, double time) {
         var active = mixer.GetActiveMixerInput(clips, time);
 
         if (active.clip != null) {
