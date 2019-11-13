@@ -33,8 +33,10 @@ public struct Tweener : ITweener {
         if (state != target) {
             previous = state;
             state = target;
+
             return true;
         }
+
         return false;
     }
 }
@@ -54,23 +56,26 @@ public static partial class PlayableExtensions {
 
     public static void TweenInputWeights<T, U>(this T playable, U tweener, float value)
             where T : struct, IPlayable
-            where U : struct, ITweener {
+            where U : struct, ITweener =>
         playable.TweenInputWeights(tweener.previous, tweener.state, value);
-    }
 
     public static void TweenInputWeights<T>(this T playable, int index1, int index2, float value)
             where T : struct, IPlayable {
         int count = playable.GetInputCount();
+
         Debug.Assert(count > 0);
         Debug.Assert(index1 >= 0 && index1 < count);
         Debug.Assert(index2 >= 0 && index2 < count);
         Debug.Assert(value >= 0 && value <= 1f);
+
         for (int i = 0; i < count; ++i) {
             float w = 0f;
+
             if (i == index2)
                 w = index1 != index2 ? value : 1f;
             else if (i == index1)
                 w = 1f - value;
+
             playable.SetInputWeight(i, w);
         }
     }

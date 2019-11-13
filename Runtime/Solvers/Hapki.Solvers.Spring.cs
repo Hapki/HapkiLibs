@@ -13,17 +13,15 @@ public struct Spring {
 
     public Spring Update(
             Vector3 target, float mass = 1f, float dampening = 1f,
-            float coefficient = 1f, float threshold = 0.01f) {
-        return Update(
+            float coefficient = 1f, float threshold = 0.01f) =>
+        Update(
             Time.deltaTime, target, mass, dampening,
             new Vector3(coefficient, coefficient, coefficient), threshold);
-    }
 
     public Spring Update(
             Vector3 target, float mass, float dampening,
-            Vector3 coefficients, float threshold = 0.01f) {
-        return Update(Time.deltaTime, target, mass, dampening, coefficients, threshold);
-    }
+            Vector3 coefficients, float threshold = 0.01f) =>
+        Update(Time.deltaTime, target, mass, dampening, coefficients, threshold);
 
     public Spring Update(
             float dt, Vector3 target, float mass, float dampening,
@@ -41,16 +39,13 @@ public struct Spring {
         velocity += Vector3.Scale(force, Vector3.one / mass) * dt;
         position += velocity;
         velocity *= Mathf.Clamp01(1f - dampening * dt);
+
         return this;
     }
 
-    public static implicit operator Vector3(Spring s) {
-        return s.position;
-    }
+    public static implicit operator Vector3(Spring s) => s.position;
 
-    public override string ToString() {
-        return position.ToString();
-    }
+    public override string ToString() => position.ToString();
 }
 
 } // Hapki.Solvers

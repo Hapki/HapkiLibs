@@ -14,9 +14,8 @@ namespace Hapki.Playables {
 
 public struct PlayableSyntax : IPlayable, IReductionSyntax<PlayableSyntax> {
     public static PlayableSyntax Create<T>(PlayableGraph graph, T playable)
-            where T : struct, IPlayable {
-        return new PlayableSyntax(graph, playable.GetHandle());
-    }
+            where T : struct, IPlayable =>
+        new PlayableSyntax(graph, playable.GetHandle());
 
     readonly PlayableGraph _graph;
     readonly PlayableHandle _handle;
@@ -26,9 +25,7 @@ public struct PlayableSyntax : IPlayable, IReductionSyntax<PlayableSyntax> {
         _handle = handle;
     }
 
-    public PlayableHandle GetHandle() {
-        return _handle;
-    }
+    public PlayableHandle GetHandle() => _handle;
 
     public void OnReduce(List<ReductionSyntax<PlayableSyntax>> nodes, int index) {
         for (int i = 0, n = nodes.Count - index; i < n; ++i)
@@ -38,28 +35,20 @@ public struct PlayableSyntax : IPlayable, IReductionSyntax<PlayableSyntax> {
 
 public static class PlayableSyntaxExtensions {
     public static ReductionSyntax<PlayableSyntax> Add(
-            this PlayableGraph graph, ref AnimationClipPlayable playable, AnimationClip clip) {
-        playable = AnimationClipPlayable.Create(graph, clip);
-        return PlayableSyntax.Create(graph, playable);
-    }
+            this PlayableGraph graph, ref AnimationClipPlayable playable, AnimationClip clip) =>
+        PlayableSyntax.Create(graph, playable = AnimationClipPlayable.Create(graph, clip));
 
     public static ReductionSyntax<PlayableSyntax> Add(
-            this PlayableGraph graph, ref AnimationMixerPlayable playable, int count) {
-        playable = AnimationMixerPlayable.Create(graph, count);
-        return PlayableSyntax.Create(graph, playable);
-    }
+            this PlayableGraph graph, ref AnimationMixerPlayable playable, int count) =>
+        PlayableSyntax.Create(graph, playable = AnimationMixerPlayable.Create(graph, count));
 
     public static ReductionSyntax<PlayableSyntax> Add(
-            this PlayableGraph graph, ref AudioClipPlayable playable, AudioClip clip, bool looping) {
-        playable = AudioClipPlayable.Create(graph, clip, looping);
-        return PlayableSyntax.Create(graph, playable);
-    }
+            this PlayableGraph graph, ref AudioClipPlayable playable, AudioClip clip, bool looping) =>
+        PlayableSyntax.Create(graph, playable = AudioClipPlayable.Create(graph, clip, looping));
 
     public static ReductionSyntax<PlayableSyntax> Add(
-            this PlayableGraph graph, ref AudioMixerPlayable playable, int count, bool normalize = false) {
-        playable = AudioMixerPlayable.Create(graph, count, normalize);
-        return PlayableSyntax.Create(graph, playable);
-    }
+            this PlayableGraph graph, ref AudioMixerPlayable playable, int count, bool normalize = false) =>
+        PlayableSyntax.Create(graph, playable = AudioMixerPlayable.Create(graph, count, normalize));
 }
 
 } // Hapki.Playables
