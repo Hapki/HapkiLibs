@@ -8,19 +8,19 @@ using UnityEngine;
 namespace Hapki {
 
 public static class Safely {
-    public static void SafeDefault<T>(ref T value) {
+    public static void SafeDefault<T>(ref T value) =>
         value = default(T);
-    }
 
-    public static void SafeDefault(ref Quaternion value) {
+    public static void SafeDefault(ref Quaternion value) =>
         value = Quaternion.identity;
-    }
 
     public static void SafeDestroy(Object obj, bool isAsset = false) {
-        if (Application.isPlaying)
-            Object.Destroy(obj);
-        else
-            Object.DestroyImmediate(obj, isAsset);
+        if (obj) {
+            if (Application.isPlaying)
+                Object.Destroy(obj);
+            else
+                Object.DestroyImmediate(obj, isAsset);
+        }
     }
 }
 

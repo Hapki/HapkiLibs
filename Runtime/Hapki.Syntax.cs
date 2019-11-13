@@ -26,6 +26,7 @@ public struct ReductionSyntax<T> where T : IReductionSyntax<T> {
     void Reduce() {
         if (nodes.Count > _index + 1) {
             _data.OnReduce(nodes, _index + 1);
+
             if (_index > 0)
                 nodes.RemoveRange(_index + 1, nodes.Count - (_index + 1));
             else
@@ -33,26 +34,18 @@ public struct ReductionSyntax<T> where T : IReductionSyntax<T> {
         }
     }
 
-    public ReductionSyntax<T> this[T _] {
-        get { return this; }
-    }
+    public ReductionSyntax<T> this[T _] => this;
 
     public static T operator-(ReductionSyntax<T> node) {
         node.Reduce();
         return node;
     }
 
-    public static T operator-(T _, ReductionSyntax<T> node) {
-        return -node;
-    }
+    public static T operator-(T _, ReductionSyntax<T> node) => -node;
 
-    public static implicit operator ReductionSyntax<T>(T data) {
-        return new ReductionSyntax<T>(data);
-    }
+    public static implicit operator ReductionSyntax<T>(T data) => new ReductionSyntax<T>(data);
 
-    public static implicit operator T(ReductionSyntax<T> node) {
-        return node._data;
-    }
+    public static implicit operator T(ReductionSyntax<T> node) => node._data;
 }
 
 } // Hapki.Syntax

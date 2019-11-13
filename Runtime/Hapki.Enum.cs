@@ -11,10 +11,7 @@ namespace Hapki {
 public static class Enum {
     public static T Parse<T>(string name, T fallback = default(T)) where T : struct, IConvertible {
 #if NET_4_6
-        T e;
-        if (System.Enum.TryParse(name, out e))
-            return e;
-        return fallback;
+        return System.Enum.TryParse(name, out T e) ? e : fallback;
 #else
         try {
             return (T) System.Enum.Parse(typeof(T), name);
@@ -31,9 +28,8 @@ public class EnumFlagsAttribute : PropertyAttribute {
 public class SerializedEnumAttribute : PropertyAttribute {
     public readonly Type type;
 
-    public SerializedEnumAttribute(Type type) {
+    public SerializedEnumAttribute(Type type) =>
         this.type = type;
-    }
 }
 
 } // Hapki
