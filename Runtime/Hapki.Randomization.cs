@@ -16,28 +16,29 @@ public struct Randomizer {
     public static float plusMinusOne { get { return (float) next * denominator; }}
     public static float zeroToOne { get { return (plusMinusOne + 1f) * 0.5f; }}
 
-    public static int operator%(Randomizer _, int count) {
-        return Mathf.FloorToInt(zeroToOne * (count - 1));
-    }
+    public static int operator%(Randomizer _, int count) =>
+        Mathf.FloorToInt(zeroToOne * (count - 1));
 }
 
 public struct WeightedRandomizer {
     public List<float> weights;
 
-    public static implicit operator WeightedRandomizer(int count) {
-        return new WeightedRandomizer {weights = new List<float>(count)};
-    }
+    public static implicit operator WeightedRandomizer(int count) =>
+        new WeightedRandomizer {weights = new List<float>(count)};
 
     public static int operator%(WeightedRandomizer rand, int count) {
         float sum;
         int i;
+
         if (rand.weights.Count != count) {
             rand.weights.Clear();
             sum = count;
+
             for (i = 0; i < count; ++i)
                 rand.weights.Add(1f);
         } else {
             sum = 0f;
+
             for (i = 0; i < count; ++i) {
                 const float restore = 0.1f;
                 rand.weights[i] = Mathf.Clamp01(rand.weights[i] + restore);

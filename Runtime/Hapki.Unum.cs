@@ -11,21 +11,13 @@ namespace Hapki {
 public struct Unum<T> : IEnumerable<T> {
     T value;
 
-    Unum(T value) {
-        this.value = value;
-    }
+    Unum(T value) => this.value = value;
 
-    public IEnumerator<T> GetEnumerator() {
-        yield return value;
-    }
+    public IEnumerator<T> GetEnumerator() { yield return value; }
 
-    IEnumerator IEnumerable.GetEnumerator() {
-        return this.GetEnumerator();
-    }
+    IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();
 
-    public static explicit operator Unum<T>(T value) {
-        return new Unum<T>(value);
-    }
+    public static explicit operator Unum<T>(T value) => new Unum<T>(value);
 }
 
 } // Hapki

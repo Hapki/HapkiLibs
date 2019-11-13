@@ -27,18 +27,14 @@ public static class AutoExtensions {
 public struct AutoList<T> where T : IAuto {
     static readonly List<T> list = new List<T>();
 
-    public int Count {
-        get { return list.Count; }
-    }
+    public int Count => list.Count;
 
     public T this[int index] {
-        get { return list[index]; }
-        set { list[index] = value; }
+        get => list[index];
+        set => list[index] = value;
     }
 
-    public List<T>.Enumerator GetEnumerator() {
-        return list.GetEnumerator();
-    }
+    public List<T>.Enumerator GetEnumerator() => list.GetEnumerator();
 
     public static AutoList<T> operator+(AutoList<T> _, T auto) {
         list.Add(auto);

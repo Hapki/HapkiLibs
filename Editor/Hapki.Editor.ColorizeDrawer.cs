@@ -27,18 +27,14 @@ public class ColorizeDrawer : PropertyDrawer {
 
     static int _index;
 
-    public static Color disabledColor {
-        get { return _disabledColor; }
-    }
+    public static Color disabledColor => _disabledColor;
 
     public static void Reset() {
         _lookup.Clear();
         _index = 0;
     }
 
-    public static Color GetColor(int _index) {
-        return _colors[_index % _colors.Length];
-    }
+    public static Color GetColor(int _index) => _colors[_index % _colors.Length];
 
     public static Color GetColor(string path) {
         int i, j;
@@ -57,9 +53,8 @@ public class ColorizeDrawer : PropertyDrawer {
         return GetColor(i);
     }
 
-    public override float GetPropertyHeight(SerializedProperty prop, GUIContent label) {
-        return EditorGUI.GetPropertyHeight(prop, label, true);
-    }
+    public override float GetPropertyHeight(SerializedProperty prop, GUIContent label) =>
+        EditorGUI.GetPropertyHeight(prop, label, true);
 
     public override void OnGUI(Rect pos, SerializedProperty prop, GUIContent label) {
         var oldColor = GUI.color;
