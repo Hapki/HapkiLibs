@@ -71,7 +71,7 @@ public struct Fixed32 {
         new Fixed32(v);
 
     public static explicit operator Fixed32(int v) =>
-        new Fixed32((short) (v << 10));
+        new Fixed32(v << 10);
 
     public static explicit operator Fixed32(float v) {
         float x = Mathf.Floor(v);
