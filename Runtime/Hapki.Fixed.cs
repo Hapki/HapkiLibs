@@ -33,7 +33,7 @@ public struct Fixed16 {
         new Fixed16((short) (x.bits + y.bits));
 
     public static Fixed16 operator-(Fixed16 x, Fixed16 y) =>
-        new Fixed16((short) (x.bits - y.bits)});
+        new Fixed16((short) (x.bits - y.bits));
 
     public static Fixed16 operator*(Fixed16 x, Fixed16 y) =>
         new Fixed16((short) ((x.bits * y.bits) >> 6));
@@ -102,7 +102,7 @@ public struct Fixed32 {
     public static bool operator<=(Fixed32 x, Fixed32 y) => x.bits <= y.bits;
     public static bool operator>=(Fixed32 x, Fixed32 y) => x.bits >= y.bits;
 
-    public static Fixed16 Abs(Fixed32 v) {
+    public static Fixed32 Abs(Fixed32 v) {
         int x = v.bits >> 10;
         return new Fixed32(((x >= 0 ? x : -x) << 10) + (v.bits & 0x3ff));
     }
