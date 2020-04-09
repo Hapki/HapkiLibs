@@ -11,6 +11,8 @@ namespace Hapki {
 
 public struct Fixed16 {
     public static Fixed16 zero => FromBits(0x0000);
+    public static Fixed16 zeroPointZeroOne => FromBits(0x0001);
+    public static Fixed16 zeroPointOne => FromBits(0x0006);
     public static Fixed16 zeroPointFive => FromBits(0x0020);
     public static Fixed16 one => FromBits(0x0040);
     public static Fixed16 onePointFive => FromBits(0x0060);
@@ -76,6 +78,8 @@ public struct Fixed16 {
 
 public struct Fixed32 {
     public static Fixed32 zero => FromBits(0x000000000);
+    public static Fixed32 zeroPointZeroOne => FromBits(0x00000000a);
+    public static Fixed32 zeroPointOne => FromBits(0x000000066);
     public static Fixed32 zeroPointFive => FromBits(0x000000200);
     public static Fixed32 one => FromBits(0x000000400);
     public static Fixed32 onePointFive => FromBits(0x000000600);
