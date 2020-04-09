@@ -10,6 +10,13 @@ namespace Hapki {
 // Q10.6 signed fixed point type
 
 public struct Fixed16 {
+    public static Fixed16 zero => FromBits(0x0000);
+    public static Fixed16 zeroPointFive => FromBits(0x0020);
+    public static Fixed16 one => FromBits(0x0040);
+    public static Fixed16 onePointFive => FromBits(0x0060);
+    public static Fixed16 two => FromBits(0x0080);
+    public static Fixed16 twoPointFive => FromBits(0x00a0);
+
     public readonly short bits;
 
     public static Fixed16 FromBits(short v) =>
@@ -52,6 +59,9 @@ public struct Fixed16 {
         return new Fixed16((short) (((x >= 0 ? x : -x) << 6) + (v.bits & 0x3f)));
     }
 
+    public static int RoundToInt(Fixed16 v) =>
+        (int) (v + zeroPointFive);
+
     Fixed16(short bits) =>
         this.bits = bits;
 
@@ -65,6 +75,13 @@ public struct Fixed16 {
 // Q22.10 signed fixed point type
 
 public struct Fixed32 {
+    public static Fixed32 zero => FromBits(0x000000000);
+    public static Fixed32 zeroPointFive => FromBits(0x000000200);
+    public static Fixed32 one => FromBits(0x000000400);
+    public static Fixed32 onePointFive => FromBits(0x000000600);
+    public static Fixed32 two => FromBits(0x000000800);
+    public static Fixed32 twoPointFive => FromBits(0x000000a00);
+
     public readonly int bits;
 
     public static Fixed32 FromBits(int v) =>
@@ -106,6 +123,9 @@ public struct Fixed32 {
         int x = v.bits >> 10;
         return new Fixed32(((x >= 0 ? x : -x) << 10) + (v.bits & 0x3ff));
     }
+
+    public static int RoundToInt(Fixed32 v) =>
+        (int) (v + zeroPointFive);
 
     Fixed32(int bits) =>
         this.bits = bits;
