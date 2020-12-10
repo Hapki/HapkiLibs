@@ -14,21 +14,21 @@ public interface IReductionSyntax<T> where T : IReductionSyntax<T> {
 public struct ReductionSyntax<T> where T : IReductionSyntax<T> {
     static readonly List<ReductionSyntax<T>> nodes = new List<ReductionSyntax<T>>();
 
-    readonly T _data;
-    readonly int _index;
+    public T Data { get; private set; }
+    public int Index { get; private set; }
 
     ReductionSyntax(T data) {
-        _data = data;
-        _index = nodes.Count;
+        Data = data;
+        Index = nodes.Count;
         nodes.Add(this);
     }
 
     void Reduce() {
-        if (nodes.Count > _index + 1) {
-            _data.OnReduce(nodes, _index + 1);
+        if (nodes.Count > Index + 1) {
+            Data.OnReduce(nodes, Index + 1);
 
-            if (_index > 0)
-                nodes.RemoveRange(_index + 1, nodes.Count - (_index + 1));
+            if (Index > 0)
+                nodes.RemoveRange(Index + 1, nodes.Count - (Index + 1));
             else
                 nodes.Clear();
         }
@@ -45,7 +45,7 @@ public struct ReductionSyntax<T> where T : IReductionSyntax<T> {
 
     public static implicit operator ReductionSyntax<T>(T data) => new ReductionSyntax<T>(data);
 
-    public static implicit operator T(ReductionSyntax<T> node) => node._data;
+    public static implicit operator T(ReductionSyntax<T> node) => node.Data;
 }
 
 } // Hapki.Syntax
