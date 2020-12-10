@@ -116,10 +116,11 @@ public struct EaseInOutSine : IInterpolation {
 public static class TypedInterpolatorExtensions {
     public static float Interpolate<E, I>(this E e, I i)
         where E : IInterpolation
-        where I : IInterpolator => e.Interpolate(i.value, i.target, i.time);
+        where I : IInterpolator => e.Interpolate(i.start, i.target, i.time);
 }
 
 public interface IInterpolator {
+    float start { get; }
     float target { get; }
     float value { get; set; }
     float time { get; set; }
@@ -135,18 +136,21 @@ public struct Interpolator : IInterpolator {
         return i.value;
     }
 
+    public float start { get; set; }
     public float target { get; set; }
     public float value { get; set; }
     public float time { get; set; }
 
     public void Target(float v) {
         if (!Mathf.Approximately(target, v)) {
+            start = value;
             target = v;
             time = 0f;
         }
     }
 
     public void Reset(float v) {
+        start = v;
         target = v;
         value = v;
         time = 0f;
@@ -156,6 +160,7 @@ public struct Interpolator : IInterpolator {
     public float Update<E>(float dt) where E : struct, IInterpolation => Update(dt, new E());
     public float Update<E>(float dt, E e) where E : struct, IInterpolation => Update(ref this, dt, e);
 
+    public float Update(Interpolation i) => Update(Time.deltaTime, i);
     public float Update(float dt, Interpolation i) =>
         Update(ref this, dt, Interpolations.GetInterpolation(i));
 
@@ -167,18 +172,21 @@ public struct Interpolator : IInterpolator {
 [Serializable]
 public struct Interpolator<E> : IInterpolator
         where E : struct, IInterpolation {
+    public float start { get; set; }
     public float target { get; set; }
     public float value { get; set; }
     public float time { get; set; }
 
     public void Target(float v) {
         if (!Mathf.Approximately(target, v)) {
+            start = value;
             target = v;
             time = 0f;
         }
     }
 
     public void Reset(float v) {
+        start = v;
         target = v;
         value = v;
         time = 0f;
