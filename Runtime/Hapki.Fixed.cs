@@ -112,10 +112,10 @@ public struct Fixed32 {
         new Fixed32(x.bits - y.bits);
 
     public static Fixed32 operator*(Fixed32 x, Fixed32 y) =>
-        new Fixed32((x.bits * y.bits) >> 10);
+        new Fixed32((int) (((long) x.bits * (long) y.bits) >> 10));
 
     public static Fixed32 operator/(Fixed32 x, Fixed32 y) =>
-        new Fixed32((x.bits << 10) / y.bits);
+        new Fixed32((int) (((long) x.bits << 10) / (long) y.bits));
 
     public static bool operator<(Fixed32 x, Fixed32 y) => x.bits < y.bits;
     public static bool operator>(Fixed32 x, Fixed32 y) => x.bits > y.bits;
