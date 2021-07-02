@@ -12,15 +12,15 @@ using Unity.Collections;
 
 namespace Hapki.Diagnostics {
 
-struct TraceEventData {
+public struct TraceEventData {
     public const byte Begin = 0x42;
     public const byte End = 0x45;
     public const byte Complete = 0x58;
     public const byte Instant = 0x69;
     public const byte Metadata = 0x4d;
 
-    public FixedString32 name;
-    public (FixedString32 name, object value)[] args;
+    public FixedString128 name;
+    public (FixedString128 name, object value)[] args;
     public long timestamp;
     public long duration;
     public int threadId;
@@ -29,9 +29,9 @@ struct TraceEventData {
 
 public struct TraceEvent : IDisposable {
     Trace _trace;
-    FixedString32 _name;
+    FixedString128 _name;
 
-    public TraceEvent(Trace trace, FixedString32 name, params (FixedString32 name, object value)[] args) {
+    public TraceEvent(Trace trace, FixedString128 name, params (FixedString128 name, object value)[] args) {
         trace.BeginEvent(name, args);
         _trace = trace;
         _name = name;
@@ -44,87 +44,119 @@ public struct TraceEvent : IDisposable {
 public struct Trace : IDisposable {
     public static Trace Create() => Create(DateTime.Now);
 
-    static Trace Create(DateTime startTime) => new Trace {
+    public static Trace Create(DateTime startTime) => new Trace {
         _eventData = new List<TraceEventData>(2048),
-        _threadNames = new Dictionary<int, FixedString32>(),
+        _threadNames = new Dictionary<int, FixedString128>(),
         _startTime = startTime,
         _isTracing = true
     };
 
     public static Trace Combine(Trace a, Trace b) {
         var trace = Create(b._startTime);
-        var deltaTime = (a._startTime - b._startTime).Ticks / 10000;
+        var deltaTime = (a._startTime - b._startTime).Ticks / 10;
 
-        for (int i = 0, n = a._eventData.Count; i < n; ++i) {
-            var e = a._eventData[i];
-            e.timestamp -= deltaTime;
-            trace._eventData.Add(e);
+        lock (a._eventData) {
+            for (int i = 0, n = a._eventData.Count; i < n; ++i) {
+                var e = a._eventData[i];
+                e.timestamp -= deltaTime;
+                trace._eventData.Add(e);
+            }
+
+            foreach (var i in a._threadNames)
+                trace._threadNames[i.Key] = i.Value;
         }
 
-        for (int i = 0, n = b._eventData.Count; i < n; ++i)
-            trace._eventData.Add(b._eventData[i]);
+        lock (b._eventData) {
+            for (int i = 0, n = b._eventData.Count; i < n; ++i)
+                trace._eventData.Add(b._eventData[i]);
+
+            foreach (var i in b._threadNames)
+                trace._threadNames[i.Key] = i.Value;
+        }
 
         trace._eventData.Sort((x, y) => (x.timestamp.CompareTo(y.timestamp)));
-
-        foreach (var i in a._threadNames)
-            trace._threadNames[i.Key] = i.Value;
-
-        foreach (var i in b._threadNames)
-            trace._threadNames[i.Key] = i.Value;
-
         return trace;
     }
 
     List<TraceEventData> _eventData;
-    Dictionary<int, FixedString32> _threadNames;
+    Dictionary<int, FixedString128> _threadNames;
     DateTime _startTime;
     bool _isTracing;
 
     internal List<TraceEventData> EventData => _eventData;
-    internal Dictionary<int, FixedString32> ThreadNames => _threadNames;
+    internal Dictionary<int, FixedString128> ThreadNames => _threadNames;
 
-    public long Timestamp => (DateTime.Now - _startTime).Ticks / 10000;
+    public long Timestamp => (DateTime.Now - _startTime).Ticks / 10;
 
     public bool IsTracing => _isTracing;
 
     public void Dispose() => this = default;
 
     public void BeginEvent(
-            FixedString32 name, params (FixedString32 name, object value)[] args) =>
+            FixedString128 name, params (FixedString128 name, object value)[] args) =>
         AddEvent(TraceEventData.Begin, name, Timestamp, args: args);
 
-    public void EndEvent(FixedString32 name, params (FixedString32 name, object value)[] args) =>
+    public void BeginEvent(
+            int threadId, FixedString128 name, params (FixedString128 name, object value)[] args) =>
+        AddEvent(TraceEventData.Begin, threadId, name, Timestamp, args: args);
+
+    public void EndEvent(FixedString128 name, params (FixedString128 name, object value)[] args) =>
         AddEvent(TraceEventData.End, name, Timestamp, args: args);
 
+    public void EndEvent(int threadId, FixedString128 name, params (FixedString128 name, object value)[] args) =>
+        AddEvent(TraceEventData.End, threadId, name, Timestamp, args: args);
+
     public void CompleteEvent(
-            FixedString32 name, int startTimestamp, params (FixedString32 name, object value)[] args) =>
+            FixedString128 name, long startTimestamp, params (FixedString128 name, object value)[] args) =>
         AddEvent(TraceEventData.Complete, name, startTimestamp, Timestamp - startTimestamp, args: args);
 
+    public void CompleteEvent(
+            int threadId, FixedString128 name, long startTimestamp, params (FixedString128 name, object value)[] args) =>
+        AddEvent(TraceEventData.Complete, threadId, name, startTimestamp, Timestamp - startTimestamp, args: args);
+
     public void InstantEvent(
-            FixedString32 name, params (FixedString32 name, object value)[] args) =>
+            FixedString128 name, params (FixedString128 name, object value)[] args) =>
         AddEvent(TraceEventData.Instant, name, Timestamp, args: args);
 
-    internal void AddEvent(
-        byte phase, FixedString32 name, long timestamp, long duration = 0,
-        params (FixedString32 name, object value)[] args)
-    {
+    public void InstantEvent(
+            int threadId, FixedString128 name, params (FixedString128 name, object value)[] args) =>
+        AddEvent(TraceEventData.Instant, threadId, name, Timestamp, args: args);
+
+    public void AddEvent(
+            byte phase, FixedString128 name, long timestamp, long duration = 0,
+            params (FixedString128 name, object value)[] args) {
         var thread = Thread.CurrentThread;
 
-        if (!_threadNames.ContainsKey(thread.ManagedThreadId))
-            _threadNames.Add(
-                thread.ManagedThreadId,
-                thread.Name ?? $"Managed Thread {thread.ManagedThreadId}");
+        lock (_eventData) {
+            if (!_threadNames.ContainsKey(thread.ManagedThreadId))
+                _threadNames.Add(
+                    thread.ManagedThreadId,
+                    thread.Name ?? $"Managed Thread {thread.ManagedThreadId}");
 
-        AddEvent(phase, name, timestamp, duration, thread.ManagedThreadId, args: args);
+            _eventData.Add(new TraceEventData {
+                name = name, args = args, timestamp = timestamp, duration = duration,
+                threadId = thread.ManagedThreadId, phase = phase
+            });
+        }
     }
 
-    internal void AddEvent(
-            byte phase, FixedString32 name, long timestamp, long duration, int threadId,
-            params (FixedString32 name, object value)[] args) =>
-        _eventData.Add(new TraceEventData {
-            name = name, args = args, timestamp = timestamp, duration = duration,
-            threadId = threadId, phase = phase
-        });
+    public void AddEvent(
+            byte phase, int threadId, FixedString128 name, long timestamp, long duration = 0,
+            params (FixedString128 name, object value)[] args) {
+        lock (_eventData) {
+            _eventData.Add(new TraceEventData {
+                name = name, args = args, timestamp = timestamp, duration = duration,
+                threadId = threadId, phase = phase
+            });
+        }
+    }
+
+    public void AddThreadName(int threadId, string name) {
+        lock (_eventData) {
+            if (!_threadNames.ContainsKey(threadId))
+                _threadNames.Add(threadId, name);
+        }
+    }
 }
 
 public static class TraceExtensions {
@@ -149,25 +181,28 @@ public static class TraceExtensions {
                 var arg = e.args[i];
 
                 if (arg.value is Array array) {
-                    builder.AppendFormat("   \"{0}\": [\n", arg.name);
+                    builder.AppendFormat("\n   \"{0}\": [", arg.name);
 
                     if (array.Length > 0) {
-                        builder.AppendFormat("    \"{0}\"", array.GetValue(0));
+                        builder.AppendFormat("\n    \"{0}\"", array.GetValue(0));
 
                         for (int j = 1; j < array.Length; ++j)
                             builder.AppendFormat(",\n    \"{0}\"", array.GetValue(j));
                     }
 
-                    builder.Append("\n   ]\n");
+                    builder.Append("\n   ]");
                 } else
-                    builder.AppendFormat("   \"{0}\": \"{1}\"", arg.name, arg.value);
+                    builder.AppendFormat("\n   \"{0}\": \"{1}\"", arg.name, arg.value);
             }
 
             builder.Append(",\n  \"args\": {\n");
             AppendArg(0);
 
             for (int i = 1; i < argCount; ++i)
+            {
+                builder.Append(',');
                 AppendArg(i);
+            }
 
             builder.Append("\n  }");
         }
@@ -197,13 +232,13 @@ public static class TraceExtensions {
         builder.AppendEvent(new TraceEventData {
             phase = TraceEventData.Metadata,
             name = "process_name",
-            args = new (FixedString32, object)[] {("name", _processName)}
+            args = new (FixedString128, object)[] {("name", _processName)}
         });
         builder.Append(",\n");
         builder.AppendEvent(new TraceEventData {
             phase = TraceEventData.Metadata,
             name = "process_labels",
-            args = new (FixedString32, object)[] {("labels", SceneManager.GetActiveScene().name)}
+            args = new (FixedString128, object)[] {("labels", SceneManager.GetActiveScene().name)}
         });
 
         var threads = Process.GetCurrentProcess().Threads;
@@ -216,7 +251,7 @@ public static class TraceExtensions {
                 phase = TraceEventData.Metadata,
                 name = "thread_name",
                 threadId = threadId,
-                args = new (FixedString32, object)[] {("name", trace.ThreadNames[threadId])}
+                args = new (FixedString128, object)[] {("name", trace.ThreadNames[threadId])}
             });
         }
 
@@ -227,15 +262,20 @@ public static class TraceExtensions {
         var builder = new StringBuilder(4096);
         var data = trace.EventData;
 
-        builder.Append("[\n");
-        builder.AppendMetaData(trace);
+        lock (data) {
+            builder.Append("{\n");
+            builder.Append("\"displayTimeUnit\": \"ms\",\n");
+            builder.Append("\"traceEvents\": [\n");
+            builder.AppendMetaData(trace);
 
-        for (int i = 0, n = data.Count; i < n; ++i) {
-            builder.Append(",\n");
-            builder.AppendEvent(data[i]);
+            for (int i = 0, n = data.Count; i < n; ++i) {
+                builder.Append(",\n");
+                builder.AppendEvent(data[i]);
+            }
+
+            builder.Append("\n]}\n");
         }
 
-        builder.Append("\n]\n");
         return builder.ToString();
     }
 
